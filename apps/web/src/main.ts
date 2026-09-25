@@ -3,15 +3,11 @@
  * practice panel, and connects them. This is the only file that knows
  * about all three layers.
  */
+import "@terminal-trainer/ui/terminal.css";
 import "./styles.css";
-import { complete } from "./core/completion";
-import { createSampleFS } from "./core/sample-fs";
-import { Shell } from "./core/shell";
-import { challenges } from "./trainer/challenges";
-import { describeTask, trainerCommands } from "./trainer/commands";
-import { Trainer } from "./trainer/trainer";
-import { createPanel } from "./ui/panel";
-import { createTerminal } from "./ui/terminal";
+import { Shell, Trainer, challenges, complete, createSampleFS, describeTask, trainerCommands } from "@terminal-trainer/core";
+import { createTerminal } from "@terminal-trainer/ui";
+import { createPanel } from "./panel";
 
 /** localStorage can throw (private mode, disabled storage); fall back to no persistence. */
 function safeStorage(): Storage | undefined {

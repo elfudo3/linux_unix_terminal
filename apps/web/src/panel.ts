@@ -4,7 +4,7 @@
  * matching command (hint, skip, next...) through the terminal so the
  * transcript always shows what happened and typing works the same way.
  */
-import type { Trainer } from "../trainer/trainer";
+import type { Trainer } from "@terminal-trainer/core";
 
 export interface PanelOptions {
   /** Runs a command line in the terminal. */

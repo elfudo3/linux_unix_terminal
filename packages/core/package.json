@@ -1,0 +1,16 @@
+{
+  "name": "@terminal-trainer/core",
+  "version": "1.0.0",
+  "description": "The simulated shell and the practice trainer. Pure TypeScript, no DOM.",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

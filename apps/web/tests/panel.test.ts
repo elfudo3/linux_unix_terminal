@@ -1,9 +1,6 @@
-// @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { createSampleFS } from "../../src/core/sample-fs";
-import { Shell } from "../../src/core/shell";
-import { Trainer, type Challenge } from "../../src/trainer/trainer";
-import { createPanel } from "../../src/ui/panel";
+import { Shell, Trainer, createSampleFS, type Challenge } from "@terminal-trainer/core";
+import { createPanel } from "../src/panel";
 
 const tiny: Challenge[] = [
   { id: "a", topic: "Basics", title: "Make a", task: "Create a file named a.", hint: "Use touch.", solution: ["touch a"], check: ({ shell }) => shell.fs.exists("/home/user/a") },

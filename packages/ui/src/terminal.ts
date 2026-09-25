@@ -7,7 +7,7 @@
  * Keys: Enter runs, Up/Down walk history, Tab completes, Ctrl+L clears,
  * Ctrl+C cancels the current line, Ctrl+U wipes it.
  */
-import type { Completion } from "../core/completion";
+import type { Completion } from "@terminal-trainer/core";
 
 export type ChunkKind = "stdout" | "stderr" | "info" | "success" | "command";
 

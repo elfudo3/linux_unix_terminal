@@ -1,6 +1,5 @@
-// @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createTerminal, type TerminalView } from "../../src/ui/terminal";
+import { createTerminal, type TerminalView } from "../src/terminal";
 
 let root: HTMLElement;
 let view: TerminalView;

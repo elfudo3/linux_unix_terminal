@@ -1,0 +1,17 @@
+{
+  "name": "terminal-trainer-web",
+  "version": "1.0.0",
+  "description": "Terminal Trainer for desktop browsers.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@terminal-trainer/core": "*",
+    "@terminal-trainer/ui": "*"
+  }
+}

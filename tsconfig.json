@@ -13,5 +13,6 @@
     "skipLibCheck": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["packages/*/src", "packages/*/tests", "apps/*/src", "apps/*/tests", "*.config.ts", "apps/*/*.config.ts", "packages/*/*.config.ts"],
+  "exclude": ["node_modules", "**/dist", "apps/mobile/ios", "apps/mobile/android"]
 }

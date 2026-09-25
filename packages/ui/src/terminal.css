@@ -1,0 +1,76 @@
+/*
+ * Terminal widget styles. Colours and fonts are tokens with defaults, so an
+ * app can retheme the widget by setting the same variables on `.terminal`
+ * or `:root` without touching this file.
+ */
+
+.terminal {
+  --terminal-bg: #05080c;
+  --terminal-fg: #e6edf3;
+  --terminal-prompt: #7ee787;
+  --terminal-error: #ff7b72;
+  --terminal-muted: #8b98a8;
+  --terminal-success: #7ee787;
+  --terminal-font: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --terminal-font-size: 14px;
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 16px;
+  background: var(--terminal-bg);
+  color: var(--terminal-fg);
+  font-family: var(--terminal-font);
+  font-size: var(--terminal-font-size);
+  line-height: 1.45;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+.line-stderr {
+  color: var(--terminal-error);
+}
+
+.line-info {
+  color: var(--terminal-muted);
+}
+
+.line-success {
+  color: var(--terminal-success);
+  font-weight: 600;
+}
+
+.line-command .prompt,
+.terminal-prompt {
+  color: var(--terminal-prompt);
+}
+
+.terminal-input-line {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+}
+
+.terminal-prompt {
+  white-space: pre;
+  flex: none;
+}
+
+.terminal-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  caret-color: var(--terminal-prompt);
+}
