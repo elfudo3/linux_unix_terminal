@@ -29,7 +29,7 @@ npm test          # run everything once
 npm run test:watch
 ```
 
-The project was built test-first. There are 164 tests: every command, the parser, the filesystem, tab completion, the trainer, the two UI views, and a test that solves every exercise with its own reference answer.
+The project was built test-first. There are 165 tests: every command, the parser, the filesystem, tab completion, the trainer, the two UI views, and a test that solves every exercise with its own reference answer.
 
 ## Deploy it
 
