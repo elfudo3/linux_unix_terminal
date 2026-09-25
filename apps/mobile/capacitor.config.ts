@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import { KeyboardResize } from "@capacitor/keyboard";
 
 /**
  * Capacitor wraps the built web app (dist/) in native iOS and Android shells.
@@ -18,7 +19,7 @@ const config: CapacitorConfig = {
   plugins: {
     Keyboard: {
       // Resize the web view when the keyboard opens so the input stays visible.
-      resize: "native",
+      resize: KeyboardResize.Native,
       resizeOnFullScreen: true,
     },
     StatusBar: {
