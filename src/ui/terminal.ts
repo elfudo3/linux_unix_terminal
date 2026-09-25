@@ -144,6 +144,9 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions): Termin
       event.preventDefault();
       clear();
     } else if (event.ctrlKey && event.key.toLowerCase() === "c") {
+      // With a selection, Ctrl+C means "copy"; leave that to the browser.
+      const selecting = input.selectionStart !== input.selectionEnd || Boolean(window.getSelection()?.toString());
+      if (selecting) return;
       event.preventDefault();
       echo(input.value + "^C");
       input.value = "";

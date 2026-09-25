@@ -84,6 +84,16 @@ describe("terminal view", () => {
     expect(submitted).toEqual([]);
   });
 
+  it("lets Ctrl+C copy when text is selected instead of cancelling", () => {
+    type("copy me");
+    view.input.setSelectionRange(0, 4);
+    const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "c", ctrlKey: true });
+    view.input.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(view.input.value).toBe("copy me");
+    expect(outputText()).not.toContain("^C");
+  });
+
   it("submit() runs a line programmatically, as if typed", () => {
     view.submit("pwd");
     expect(submitted).toEqual(["pwd"]);
