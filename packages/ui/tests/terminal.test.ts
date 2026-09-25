@@ -112,3 +112,75 @@ describe("terminal view", () => {
     expect(focus).toHaveBeenCalled();
   });
 });
+
+describe("terminal view: touch helpers", () => {
+  it("insert() adds text at the caret, replacing any selection, and keeps focus", () => {
+    const focus = vi.spyOn(view.input, "focus");
+    type("cat file");
+    view.input.setSelectionRange(3, 3);
+    view.insert(" -n");
+    expect(view.input.value).toBe("cat -n file");
+    expect(view.input.selectionStart).toBe(6);
+    view.input.setSelectionRange(0, 3);
+    view.insert("head");
+    expect(view.input.value).toBe("head -n file");
+    expect(focus).toHaveBeenCalled();
+  });
+
+  it("sendKey() drives completion, history, submit and control keys", () => {
+    history.push("older", "newest");
+    type("ec");
+    view.sendKey("Tab");
+    expect(view.input.value).toBe("echo ");
+    view.sendKey("ArrowUp");
+    expect(view.input.value).toBe("newest");
+    view.sendKey("ArrowUp");
+    expect(view.input.value).toBe("older");
+    view.sendKey("ArrowDown");
+    expect(view.input.value).toBe("newest");
+    view.sendKey("Enter");
+    expect(submitted).toEqual(["newest"]);
+    type("abandon");
+    view.sendKey("ctrl+c");
+    expect(view.input.value).toBe("");
+    expect(outputText()).toContain("abandon^C");
+    view.sendKey("ctrl+l");
+    expect(outputText()).toBe("");
+    type("wipe me");
+    view.sendKey("ctrl+u");
+    expect(view.input.value).toBe("");
+  });
+
+  it("can be told not to focus on click, for touch screens", () => {
+    document.body.innerHTML = '<div id="t2"></div>';
+    const quiet = createTerminal(document.getElementById("t2")!, {
+      prompt: () => "$ ",
+      onSubmit: () => {},
+      history: () => [],
+      focusOnClick: false,
+    });
+    const focus = vi.spyOn(quiet.input, "focus");
+    quiet.element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(focus).not.toHaveBeenCalled();
+  });
+});
+
+describe("terminal view: docked layout", () => {
+  it("can dock the input line below a scrolling output area and show a Run button", () => {
+    document.body.innerHTML = '<div id="t3"></div>';
+    const lines: string[] = [];
+    const docked = createTerminal(document.getElementById("t3")!, {
+      prompt: () => "$ ",
+      onSubmit: (line) => lines.push(line),
+      history: () => [],
+      dockInput: true,
+      submitButton: "Run",
+    });
+    expect(docked.element.classList.contains("terminal-docked")).toBe(true);
+    const button = docked.element.querySelector<HTMLButtonElement>(".terminal-run")!;
+    expect(button.getAttribute("aria-label")).toBe("Run");
+    docked.input.value = "pwd";
+    button.click();
+    expect(lines).toEqual(["pwd"]);
+  });
+});

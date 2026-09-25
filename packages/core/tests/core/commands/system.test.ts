@@ -42,10 +42,12 @@ describe("system commands", () => {
 });
 
 describe("help and man", () => {
-  it("help lists commands grouped by category", () => {
+  it("help lists commands grouped by category, in the curated order", () => {
     const text = out(makeShell(), "help");
+    expect(text.startsWith("Navigation\n")).toBe(true);
     expect(text).toMatch(/Files/);
     expect(text).toMatch(/^\s+ls\s+list directory contents$/m);
+    expect(text.indexOf("Navigation")).toBeLessThan(text.indexOf("Help"));
   });
 
   it("man shows the usage and details of one command", () => {

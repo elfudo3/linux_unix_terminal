@@ -1,0 +1,736 @@
+/*
+ * Terminal Trainer mobile styles.
+ * Order: tokens → base → app frame (app bar, tabs) → practice screen →
+ * tasks screen → learn screen → settings sheet → toast → accessibility.
+ * Tap targets are 44px or taller; text inputs are 16px so iOS never zooms.
+ */
+
+:root {
+  --bg: #0b0f14;
+  --surface: #131a23;
+  --surface-2: #1c2530;
+  --border: #253141;
+  --text: #e6edf3;
+  --muted: #8b98a8;
+  --accent: #58a6ff;
+  --accent-strong: #1f6feb;
+  --success: #3fb950;
+  --danger: #f85149;
+  --prompt: #7ee787;
+  --radius: 14px;
+  --tap: 44px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f2f4f7;
+    --surface: #ffffff;
+    --surface-2: #eef1f5;
+    --border: #d7dde5;
+    --text: #1f2328;
+    --muted: #57606a;
+    --accent: #0969da;
+    --accent-strong: #0969da;
+    --success: #1a7f37;
+    --danger: #cf222e;
+    --prompt: #1a7f37;
+    color-scheme: light;
+  }
+}
+
+/* ---- Base ---------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* the app manages its own scrolling areas */
+  background: var(--bg);
+}
+
+body {
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* no double-tap zoom delay on buttons */
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button {
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---- App frame ----------------------------------------------------------- */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+}
+
+.appbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 8px 0 16px;
+}
+
+.appbar-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.appbar-logo {
+  font-family: var(--mono);
+  color: var(--prompt);
+}
+
+.icon-button {
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+}
+
+.icon-button:active {
+  background: var(--surface-2);
+}
+
+.screens {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.screen {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollable {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 16px;
+}
+
+.screen-header {
+  padding: 4px 16px 10px;
+}
+
+.screen-header h2 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.tabbar {
+  flex: none;
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab {
+  flex: 1;
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tab-active {
+  color: var(--accent);
+}
+
+/* While typing, the chrome gets out of the way and the terminal takes the room. */
+.app.keyboard-open .tabbar,
+.app.keyboard-open .appbar {
+  display: none;
+}
+
+/* ---- Practice screen ----------------------------------------------------- */
+
+.task-card {
+  flex: none;
+  margin: 6px 12px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 200ms ease;
+}
+
+.task-card.solved {
+  border-color: var(--success);
+}
+
+.task-card-header {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.task-card-heading {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.task-title {
+  font-size: 16px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  color: var(--muted);
+  transition: transform 200ms ease;
+}
+
+.task-card.collapsed .chevron {
+  transform: rotate(180deg);
+}
+
+.task-card.collapsed .task-card-body {
+  display: none;
+}
+
+.task-card-body {
+  padding: 0 14px 12px;
+}
+
+.task-text {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.task-status {
+  margin: 0 0 10px;
+  color: var(--success);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.task-status:empty {
+  display: none;
+}
+
+.task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn:active {
+  filter: brightness(1.15);
+}
+
+.btn-primary {
+  margin-left: auto;
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #fff;
+}
+
+.btn-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: transparent;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.terminal-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  margin: 0 12px;
+}
+
+.terminal {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.suggestions,
+.keybar {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 12px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* A fade at the right edge hints that the row scrolls. */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
+
+.suggestions::-webkit-scrollbar,
+.keybar::-webkit-scrollbar {
+  display: none;
+}
+
+.suggestions {
+  padding-bottom: 0;
+}
+
+.chip {
+  flex: none;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.chip:active {
+  background: var(--surface-2);
+}
+
+.keybar-wrap {
+  flex: none;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.keybar {
+  flex: 1;
+  min-width: 0;
+}
+
+.keybar-hide {
+  display: none;
+  flex: none;
+  width: var(--tap);
+  height: 40px;
+  margin-right: 8px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.app.keyboard-open .keybar-hide {
+  display: grid;
+}
+
+.keybar-key {
+  flex: none;
+  min-width: var(--tap);
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.keybar-key:active {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+/* ---- Tasks screen -------------------------------------------------------- */
+
+.progress {
+  height: 8px;
+  margin: 6px 0;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--success);
+  transition: width 300ms ease;
+}
+
+.progress-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.task-list,
+.command-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px;
+}
+
+.topic-heading,
+.category-heading {
+  margin: 16px 4px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.category-heading {
+  margin-left: 16px;
+}
+
+.task-row,
+.command-row {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+}
+
+.task-row:active,
+.command-row:active {
+  background: var(--surface-2);
+}
+
+.task-num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.task-row-title {
+  flex: 1;
+}
+
+.task-check {
+  color: var(--success);
+  font-weight: 700;
+  opacity: 0;
+}
+
+.task-row.done .task-check {
+  opacity: 1;
+}
+
+.task-row.done .task-num {
+  background: var(--success);
+  color: #fff;
+}
+
+.task-row.current {
+  border-color: var(--accent);
+}
+
+/* ---- Learn screen -------------------------------------------------------- */
+
+.learn-search {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* 16px stops iOS from zooming into the field */
+}
+
+.command-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.command-name {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.command-summary {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.learn-detail {
+  padding: 4px 16px 24px;
+}
+
+.back-button {
+  min-height: var(--tap);
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 16px;
+}
+
+.command-title {
+  margin: 4px 0;
+  font-family: var(--mono);
+  font-size: 28px;
+}
+
+.learn-detail .command-summary {
+  margin: 0;
+  font-size: 16px;
+}
+
+.learn-detail h3,
+.sheet h3 {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.learn-detail pre {
+  margin: 0;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.try-button {
+  width: 100%;
+  min-height: 48px;
+  margin: 20px 0 0;
+}
+
+/* ---- Settings sheet ------------------------------------------------------ */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: 8px 20px calc(20px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  animation: slide-up 250ms ease;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  margin: 4px auto 12px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.sheet h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.segmented button {
+  flex: 1;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+}
+
+.segmented button[aria-pressed="true"] {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.reset-confirm-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.reset-confirm-row p {
+  width: 100%;
+  margin: 0 0 4px;
+}
+
+.about {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sheet-close {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 20px;
+}
+
+/* ---- Toast --------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index: 30;
+  padding: 10px 18px;
+  border-radius: 22px;
+  background: var(--success);
+  color: #fff;
+  font-weight: 700;
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+  pointer-events: none;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---- Accessibility ------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid #f0b429;
+  outline-offset: 2px;
+}
+
+.terminal-input:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

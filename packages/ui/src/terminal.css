@@ -74,3 +74,40 @@
   font: inherit;
   caret-color: var(--terminal-prompt);
 }
+
+/* Docked layout (phones): output scrolls, the input line stays at the bottom. */
+.terminal-docked {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.terminal-docked .terminal-output {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+  overscroll-behavior: contain;
+}
+
+.terminal-docked .terminal-input-line {
+  flex: none;
+  align-items: center;
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.terminal-run {
+  flex: none;
+  margin-left: 8px;
+  width: 40px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--terminal-prompt);
+  color: var(--terminal-bg);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}

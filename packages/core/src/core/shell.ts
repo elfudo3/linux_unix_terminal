@@ -66,8 +66,14 @@ export class Shell {
     return this.commands.get(name);
   }
 
+  /** Command names, alphabetically (for completion). */
   commandNames(): string[] {
     return [...this.commands.keys()].sort();
+  }
+
+  /** Commands in the order they were registered (the curated order `help` shows). */
+  listCommands(): Command[] {
+    return [...this.commands.values()];
   }
 
   // ---- Paths -------------------------------------------------------------

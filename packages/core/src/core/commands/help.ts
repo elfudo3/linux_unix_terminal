@@ -44,8 +44,7 @@ export const help: Command = {
     if (ctx.args.length > 0) return man.run(ctx);
     // Group by category, keeping the order commands were registered in.
     const groups = new Map<string, Command[]>();
-    for (const name of ctx.shell.commandNames()) {
-      const cmd = ctx.shell.getCommand(name)!;
+    for (const cmd of ctx.shell.listCommands()) {
       const key = cmd.category ?? "Other";
       groups.set(key, [...(groups.get(key) ?? []), cmd]);
     }

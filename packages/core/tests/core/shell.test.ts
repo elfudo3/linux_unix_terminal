@@ -180,8 +180,11 @@ describe("History and misc", () => {
     expect(makeShell().run("clear").clear).toBe(true);
   });
 
-  it("lists registered command names", () => {
-    expect(makeShell().commandNames()).toContain("ls");
+  it("lists registered command names alphabetically and commands in registration order", () => {
+    const shell = makeShell();
+    expect(shell.commandNames()).toContain("ls");
+    expect(shell.commandNames()).toEqual([...shell.commandNames()].sort());
+    expect(shell.listCommands()[0]?.name).toBe("pwd");
   });
 });
 

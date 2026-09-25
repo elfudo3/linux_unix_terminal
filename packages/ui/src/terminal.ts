@@ -5,11 +5,15 @@
  * and mobile keyboards work.
  *
  * Keys: Enter runs, Up/Down walk history, Tab completes, Ctrl+L clears,
- * Ctrl+C cancels the current line, Ctrl+U wipes it.
+ * Ctrl+C cancels the current line, Ctrl+U wipes it. The same actions are
+ * reachable through `sendKey`, so an on-screen key bar can trigger them.
  */
 import type { Completion } from "@terminal-trainer/core";
 
 export type ChunkKind = "stdout" | "stderr" | "info" | "success" | "command";
+
+/** Keys the widget understands, for physical keyboards and on-screen buttons alike. */
+export type TerminalKey = "Enter" | "Tab" | "ArrowUp" | "ArrowDown" | "ctrl+c" | "ctrl+l" | "ctrl+u";
 
 export interface TerminalOptions {
   /** Current prompt text, e.g. "user@sandbox:~$ ". Called before every echo. */
@@ -21,6 +25,16 @@ export interface TerminalOptions {
   complete?: (line: string) => Completion;
   /** How many output chunks to keep in the DOM (oldest are dropped). */
   maxChunks?: number;
+  /** Focus the input when the output area is clicked (default true; off for touch screens). */
+  focusOnClick?: boolean;
+  /**
+   * Keep the input line fixed at the bottom while only the output scrolls
+   * (phone layout). Default false: the prompt follows the output, like a
+   * real terminal.
+   */
+  dockInput?: boolean;
+  /** Label for an on-screen Run button next to the input (omit for none). */
+  submitButton?: string;
 }
 
 export interface TerminalView {
@@ -32,13 +46,18 @@ export interface TerminalView {
   focus(): void;
   /** Runs `line` exactly as if the user had typed it and pressed Enter. */
   submit(line: string): void;
+  /** Inserts text at the caret (replacing a selection) and keeps the input focused. */
+  insert(text: string): void;
+  /** Performs the action of a key, exactly as if it had been pressed. */
+  sendKey(key: TerminalKey): void;
 }
 
 export function createTerminal(root: HTMLElement, opts: TerminalOptions): TerminalView {
   const maxChunks = opts.maxChunks ?? 500;
 
+  const docked = opts.dockInput ?? false;
   root.innerHTML = `
-    <div class="terminal" role="region" aria-label="Terminal">
+    <div class="terminal${docked ? " terminal-docked" : ""}" role="region" aria-label="Terminal">
       <div class="terminal-output" role="log" aria-live="polite"></div>
       <form class="terminal-input-line" autocomplete="off">
         <label class="terminal-prompt" for="terminal-input"></label>
@@ -52,6 +71,16 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions): Termin
   const form = root.querySelector<HTMLFormElement>(".terminal-input-line")!;
   const promptEl = root.querySelector<HTMLElement>(".terminal-prompt")!;
   const input = root.querySelector<HTMLInputElement>(".terminal-input")!;
+  if (opts.submitButton) {
+    const button = document.createElement("button");
+    button.type = "submit";
+    button.className = "terminal-run";
+    button.setAttribute("aria-label", opts.submitButton);
+    button.textContent = "↵";
+    form.appendChild(button);
+  }
+  // In the docked layout only the output scrolls; otherwise the whole widget does.
+  const scroller = docked ? output : element;
 
   // History navigation state: index into history(), and the draft typed before browsing.
   let historyIndex = -1;
@@ -60,7 +89,7 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions): Termin
   const refreshPrompt = () => (promptEl.textContent = opts.prompt());
 
   const scrollToBottom = () => {
-    element.scrollTop = element.scrollHeight;
+    scroller.scrollTop = scroller.scrollHeight;
   };
 
   const print = (text: string, kind: ChunkKind = "stdout") => {
@@ -127,45 +156,79 @@ export function createTerminal(root: HTMLElement, opts: TerminalOptions): Termin
     submit(input.value);
   });
 
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      submit(input.value);
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      browseHistory(-1);
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      browseHistory(1);
-    } else if (event.key === "Tab") {
-      event.preventDefault();
-      tabComplete();
-    } else if (event.ctrlKey && event.key.toLowerCase() === "l") {
-      event.preventDefault();
-      clear();
-    } else if (event.ctrlKey && event.key.toLowerCase() === "c") {
-      // With a selection, Ctrl+C means "copy"; leave that to the browser.
-      const selecting = input.selectionStart !== input.selectionEnd || Boolean(window.getSelection()?.toString());
-      if (selecting) return;
-      event.preventDefault();
-      echo(input.value + "^C");
-      input.value = "";
-      historyIndex = -1;
-    } else if (event.ctrlKey && event.key.toLowerCase() === "u") {
-      event.preventDefault();
-      input.value = "";
+  /** The one place every key action is defined; used by keydown and sendKey. */
+  const sendKey = (key: TerminalKey) => {
+    switch (key) {
+      case "Enter":
+        submit(input.value);
+        break;
+      case "ArrowUp":
+        browseHistory(-1);
+        break;
+      case "ArrowDown":
+        browseHistory(1);
+        break;
+      case "Tab":
+        tabComplete();
+        break;
+      case "ctrl+l":
+        clear();
+        break;
+      case "ctrl+c":
+        echo(input.value + "^C");
+        input.value = "";
+        historyIndex = -1;
+        break;
+      case "ctrl+u":
+        input.value = "";
+        break;
     }
+  };
+
+  /** Maps a physical key press to a TerminalKey, or null if the browser should handle it. */
+  const keyFromEvent = (event: KeyboardEvent): TerminalKey | null => {
+    if (event.ctrlKey) {
+      const letter = event.key.toLowerCase();
+      if (letter === "l") return "ctrl+l";
+      if (letter === "u") return "ctrl+u";
+      if (letter === "c") {
+        // With a selection, Ctrl+C means "copy"; leave that to the browser.
+        const selecting = input.selectionStart !== input.selectionEnd || Boolean(window.getSelection()?.toString());
+        return selecting ? null : "ctrl+c";
+      }
+      return null;
+    }
+    if (event.key === "Enter" || event.key === "Tab" || event.key === "ArrowUp" || event.key === "ArrowDown") return event.key;
+    return null;
+  };
+
+  input.addEventListener("keydown", (event) => {
+    const key = keyFromEvent(event);
+    if (key === null) return;
+    event.preventDefault();
+    sendKey(key);
   });
 
+  const insert = (text: string) => {
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? start;
+    input.value = input.value.slice(0, start) + text + input.value.slice(end);
+    const caret = start + text.length;
+    input.focus();
+    input.setSelectionRange(caret, caret);
+  };
+
   // Clicking anywhere in the terminal focuses the input, unless the user is selecting text to copy.
-  element.addEventListener("click", () => {
-    if (!window.getSelection()?.toString()) input.focus();
-  });
+  if (opts.focusOnClick ?? true) {
+    element.addEventListener("click", () => {
+      if (!window.getSelection()?.toString()) input.focus();
+    });
+  }
 
   const clear = () => {
     output.replaceChildren();
   };
 
   refreshPrompt();
-  return { element, input, print, clear, submit, focus: () => input.focus() };
+  return { element, input, print, clear, submit, insert, sendKey, focus: () => input.focus() };
 }
