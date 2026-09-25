@@ -8,7 +8,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "sync": "vite build && cap sync",
+    "ios": "cap open ios",
+    "android": "cap open android",
+    "run:ios": "cap run ios",
+    "run:android": "cap run android",
+    "assets": "capacitor-assets generate --ios --android --iconBackgroundColor '#0b0f14' --iconBackgroundColorDark '#0b0f14' --splashBackgroundColor '#0b0f14' --splashBackgroundColorDark '#0b0f14'"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -22,6 +28,7 @@
     "@terminal-trainer/ui": "*"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.5.2"
   }
 }
