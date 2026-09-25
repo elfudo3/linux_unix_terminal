@@ -1,95 +1,74 @@
 # Terminal Trainer
 
-A virtual Linux terminal that runs in your browser, with guided exercises to help you get good at the command line. Nothing touches a real computer: the filesystem, the shell and every command are simulated, so you can `rm -rf` to your heart's content.
+Get good at the Linux command line in a safe, simulated terminal with guided exercises. Nothing touches a real computer: the filesystem, the shell and every command are simulated, so you can `rm -rf` to your heart's content.
 
-![Terminal Trainer screenshot](docs/screenshot.png)
+It comes in two flavours that share one engine:
+
+| | Desktop web app | iOS / Android app |
+| --- | --- | --- |
+| Where | `apps/web` | `apps/mobile` |
+| Run locally | `npm run dev` | `npm run dev:mobile` (browser) or `npm run mobile:ios` / `npm run mobile:android` |
+| Interface | terminal beside a task panel | tabs: Practice, Tasks, Learn; key bar and suggestions above the phone keyboard |
+| Deploy | any static host, GitHub Pages | App Store, Google Play (see [apps/mobile/README.md](apps/mobile/README.md)) |
+
+![Terminal Trainer desktop](apps/web/docs/screenshot.png)
 
 ## What you get
 
-- **A realistic shell.** Pipes (`|`), redirects (`>`, `>>`, `<`), `&&` / `||` / `;`, quotes, `$VARIABLES`, `~`, wildcards (`*.txt`), Tab completion, Up/Down history, `Ctrl+L`, `Ctrl+C`.
+- **A realistic shell.** Pipes (`|`), redirects (`>`, `>>`, `<`), `&&` / `||` / `;`, quotes, `$VARIABLES`, `~`, wildcards (`*.txt`), Tab completion, history, `Ctrl+L`, `Ctrl+C`.
 - **40 commands** with real error messages and `man` pages: `ls cd pwd tree cat touch mkdir rm rmdir cp mv chmod echo head tail wc grep sort uniq cut tr sed awk find which xargs whoami hostname uname date history clear env printenv export unset true false help man`.
-- **62 exercises** across navigation, files, viewing, searching, pipes, permissions and environment. Each is checked automatically after every command. Progress is saved in your browser.
-- **Zero runtime dependencies.** The whole app is 26 KB gzipped and works offline once loaded.
+- **62 exercises** across navigation, files, viewing, searching, pipes, permissions and environment, checked automatically after every command. Progress is saved on the device.
+- **Zero runtime dependencies** in the web app; the mobile app adds only Capacitor.
 
-## Run it locally
+## Quick start
 
 You need [Node.js](https://nodejs.org/) 20 or newer.
 
 ```bash
 npm install
-npm run dev
+npm run dev            # desktop app  → http://localhost:5173
+npm run dev:mobile     # mobile app in a browser (use the device toolbar)
+npm test               # every test in every package
+npm run build          # type-check and build both apps
 ```
-
-Open the URL it prints (usually <http://localhost:5173>).
-
-## Run the tests
-
-```bash
-npm test          # run everything once
-npm run test:watch
-```
-
-The project was built test-first. There are 165 tests: every command, the parser, the filesystem, tab completion, the trainer, the two UI views, and a test that solves every exercise with its own reference answer.
-
-## Deploy it
-
-```bash
-npm run build
-```
-
-This type-checks the code and writes a static site to `dist/`. Upload that folder to any static host (GitHub Pages, Netlify, Vercel, an S3 bucket, nginx...). Paths are relative, so it works from a sub-folder too.
-
-**GitHub Pages:** the workflow in `.github/workflows/ci.yml` runs the tests on every push and deploys `dist/` to Pages on every push to `main`. One-time setup: open *Settings → Pages* and set *Source* to *GitHub Actions*, then push to `main` (or re-run the last workflow). The site is served at `https://<user>.github.io/<repo>/`.
 
 ## How it is organised
 
 ```
-index.html              the page
-src/
-  main.ts               entry point: wires the three layers together
-  styles.css
-  core/                 the shell, no DOM code, fully unit tested
-    filesystem.ts       in-memory filesystem (files, dirs, permissions)
-    parser.ts           command line → words, pipes, redirects
-    glob.ts             *.txt expansion
-    shell.ts            runs a line: expansion, pipes, redirects, exit codes
-    completion.ts       Tab completion
-    sample-fs.ts        the files you start with
-    commands/           one file per group: navigation, files, text, search, system, help
-  trainer/              practice mode
-    challenges.ts       the exercises
-    trainer.ts          loads a task, checks it, saves progress
-    commands.ts         task, hint, answer, next, skip, progress, reset
-  ui/                   the widget
-    terminal.ts         output log + input line, keyboard handling
-    panel.ts            the task card beside the terminal
-tests/                  mirrors src/
+packages/
+  core/     the simulated shell, 40 commands, the trainer and 62 exercises (pure TypeScript, no DOM)
+  ui/       the terminal widget (output log + input line) shared by both apps
+apps/
+  web/      desktop web app: page, task panel, styles
+  mobile/   iOS/Android app (Capacitor): screens, key bar, native projects
 ```
 
-The layers only point downwards: `ui` uses `trainer` and `core`; `trainer` uses `core`; `core` uses nothing. Each command is a small object with a name, a summary, a `man` text and a `run` function, so `help` and `man` are generated from the same data the shell runs.
+Layers only point downwards: apps use `ui` and `core`; `ui` uses `core`; `core` uses nothing. Each workspace has its own tests (`tests/` next to `src/`) and `npm test` at the root runs them all. Because the apps share the engine, a new command or exercise added to `packages/core` appears in both.
+
+Each package has a README-level comment at the top of its main files; start with `packages/core/src/index.ts` to see the public API.
 
 ## Add a command
 
-1. Add an object to the right file in `src/core/commands/` (or a new file, and list it in `commands/index.ts`):
+Add an object to the right file in `packages/core/src/core/commands/` (or a new file listed in `commands/index.ts`), test-first in `packages/core/tests/core/commands/`:
 
-   ```ts
-   export const rev: Command = {
-     name: "rev",
-     category: "Text",
-     summary: "reverse each line",
-     usage: "rev [file...]",
-     details: "Prints each line of FILE (or stdin) backwards.",
-     run: (ctx) => readInputs("rev", ctx, ctx.args, (text) =>
-       joinLines(splitLines(text).map((line) => [...line].reverse().join(""))),
-     ),
-   };
-   ```
+```ts
+export const rev: Command = {
+  name: "rev",
+  category: "Text",
+  summary: "reverse each line",
+  usage: "rev [file...]",
+  details: "Prints each line of FILE (or stdin) backwards.",
+  run: (ctx) => readInputs("rev", ctx, ctx.args, (text) =>
+    joinLines(splitLines(text).map((line) => [...line].reverse().join(""))),
+  ),
+};
+```
 
-2. Write a test in `tests/core/commands/` first: `expect(out(shell, "echo abc | rev")).toBe("cba\n")`.
+`help`, `man`, Tab completion, the mobile Learn tab and the suggestion chips all pick it up automatically.
 
 ## Add an exercise
 
-Append an object to `src/trainer/challenges.ts`:
+Append an object to `packages/core/src/trainer/challenges.ts`:
 
 ```ts
 {
@@ -105,7 +84,11 @@ Append an object to `src/trainer/challenges.ts`:
 
 `check` runs after every command and receives the shell (files, current directory, variables), the line typed, and what it printed. An optional `setup(shell)` prepares files before the task starts. Every task begins from a fresh copy of the sample filesystem.
 
-## Keyboard shortcuts
+## Deploy the web app
+
+`npm run build:web` writes a static site to `apps/web/dist/`; upload it anywhere. The GitHub Actions workflow tests every push, builds a debug Android APK and an iOS simulator build, and on pushes to `main` publishes the desktop app to GitHub Pages at `/` with the mobile web app at `/mobile/`. One-time setup: *Settings → Pages → Source: GitHub Actions*.
+
+## Keyboard shortcuts (desktop)
 
 | Key | Action |
 | --- | --- |
@@ -114,3 +97,5 @@ Append an object to `src/trainer/challenges.ts`:
 | `Ctrl+L` | clear the screen (same as `clear`) |
 | `Ctrl+C` | cancel the line you are typing |
 | `Ctrl+U` | erase the line you are typing |
+
+On a phone the same actions are on the key bar above the keyboard.
