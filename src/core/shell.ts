@@ -30,7 +30,7 @@ const EXIT_NOT_FOUND = 127;
 const EXIT_SYNTAX = 2;
 
 export class Shell {
-  readonly fs: VirtualFS;
+  fs: VirtualFS;
   readonly user: string;
   readonly host: string;
   readonly home: string;
@@ -86,6 +86,14 @@ export class Shell {
     this.previousCwd = this.cwd;
     this.cwd = target;
     this.env.set("PWD", target);
+  }
+
+  /** Replaces the filesystem and returns home. Used to reset the sandbox. */
+  resetFilesystem(fs: VirtualFS): void {
+    this.fs = fs;
+    this.cwd = this.home;
+    this.previousCwd = this.home;
+    this.env.set("PWD", this.home);
   }
 
   /** The directory before the last `cd`, used by `cd -`. */

@@ -184,3 +184,18 @@ describe("History and misc", () => {
     expect(makeShell().commandNames()).toContain("ls");
   });
 });
+
+describe("Reset", () => {
+  it("swaps in a fresh filesystem and returns home", () => {
+    const shell = makeShell();
+    shell.run("cd docs");
+    shell.run("rm /home/user/a.txt");
+    const fresh = new VirtualFS();
+    fresh.mkdir("/home/user", { parents: true });
+    fresh.writeFile("/home/user/a.txt", "back");
+    shell.resetFilesystem(fresh);
+    expect(shell.cwd).toBe("/home/user");
+    expect(shell.run("cat a.txt").stdout).toBe("back");
+    expect(shell.run("cd -").stdout).toBe("/home/user\n");
+  });
+});
