@@ -86,7 +86,7 @@ Append an object to `packages/core/src/trainer/challenges.ts`:
 
 ## Deploy the web app
 
-`npm run build:web` writes a static site to `apps/web/dist/`; upload it anywhere. The GitHub Actions workflow tests every push, builds a debug Android APK and an iOS simulator build, and on pushes to `main` publishes the desktop app to GitHub Pages at `/` with the mobile web app at `/mobile/`. One-time setup: *Settings → Pages → Source: GitHub Actions*.
+`npm run build:web` writes a static site to `apps/web/dist/`; upload it anywhere. The GitHub Actions workflow tests every push, builds a debug Android APK and an iOS simulator build, and on pushes to the repository's default branch publishes the desktop app to GitHub Pages at `/` with the mobile web app at `/mobile/`. One-time setup: *Settings → Pages → Source: GitHub Actions*.
 
 ## Keyboard shortcuts (desktop)
 

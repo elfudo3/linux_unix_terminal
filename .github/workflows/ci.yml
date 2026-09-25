@@ -79,11 +79,11 @@ jobs:
           -derivedDataPath build CODE_SIGNING_ALLOWED=NO -quiet build
         working-directory: apps/mobile
 
-  # Publishes the site to GitHub Pages on pushes to main.
+  # Publishes the site to GitHub Pages on pushes to the repository's default branch.
   # One-time setup by a repo admin: Settings → Pages → Source: GitHub Actions.
   deploy:
     name: Deploy to GitHub Pages
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref_name == github.event.repository.default_branch && github.event_name == 'push'
     needs: test
     runs-on: ubuntu-latest
     permissions:
