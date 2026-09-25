@@ -39,7 +39,7 @@ npm run build
 
 This type-checks the code and writes a static site to `dist/`. Upload that folder to any static host (GitHub Pages, Netlify, Vercel, an S3 bucket, nginx...). Paths are relative, so it works from a sub-folder too.
 
-**GitHub Pages:** the workflow in `.github/workflows/ci.yml` runs the tests on every push and deploys `dist/` to Pages on every push to `main`. It switches Pages on for the repository automatically the first time; if that step is ever refused, enable it once under *Settings → Pages → Source: GitHub Actions* and re-run the workflow. The site is served at `https://<user>.github.io/<repo>/`.
+**GitHub Pages:** the workflow in `.github/workflows/ci.yml` runs the tests on every push and deploys `dist/` to Pages on every push to `main`. One-time setup: open *Settings → Pages* and set *Source* to *GitHub Actions*, then push to `main` (or re-run the last workflow). The site is served at `https://<user>.github.io/<repo>/`.
 
 ## How it is organised
 

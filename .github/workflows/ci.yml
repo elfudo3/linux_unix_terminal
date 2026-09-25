@@ -25,8 +25,9 @@ jobs:
         with:
           path: dist
 
-  # Publishes dist/ to GitHub Pages on pushes to main. The configure step
-  # switches Pages on for the repository the first time it runs.
+  # Publishes dist/ to GitHub Pages on pushes to main.
+  # One-time setup by a repo admin: Settings → Pages → Source: GitHub Actions.
+  # Until then this job fails with "Resource not accessible by integration".
   deploy:
     name: Deploy to GitHub Pages
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
